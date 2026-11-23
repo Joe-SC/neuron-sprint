@@ -1,0 +1,16 @@
+{
+  "name": "neuron-sprint",
+  "version": "0.1.0",
+  "description": "Open-source brain training LAN party game for phones, inspired by Brain Age. No affiliation with Nintendo.",
+  "type": "module",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "qrcode": "^1.5.4",
+    "ws": "^8.18.0"
+  }
+}
