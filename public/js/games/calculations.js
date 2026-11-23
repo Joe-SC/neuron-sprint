@@ -2,7 +2,6 @@ import { createNumpad } from "../numpad.js";
 import { el, clear } from "../render.js";
 import { beepCorrect, beepWrong } from "../audio.js";
 
-// Normalize input (same as shared/calculations.js)
 function normalize(input) {
   return String(input).trim().replace(/^0+(?=\d)/, "");
 }
@@ -20,27 +19,26 @@ export function mountCalculations(container, payload, callbacks) {
 
   let enabled = false;
   let submitted = false;
+  let waitingEl = null;
   const correctAnswer = String(payload.answer);
 
-  // Local result flash
   function showLocalResult(ok) {
     const flash = document.createElement("div");
-    flash.className = "result-flash show";
-    flash.style.cssText = `position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;z-index:5;pointer-events:none;transition:opacity 0.1s`;
+    flash.style.cssText = `position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:2rem;font-weight:800;z-index:5;pointer-events:none;transition:opacity 0.1s`;
     if (ok) {
       flash.style.background = "rgba(34,197,94,0.12)";
       flash.style.color = "#22c55e";
-      flash.textContent = "✓ Correct!";
+      flash.innerHTML = '<div>✓ Correct!</div><div style="font-size:0.9rem;font-weight:400;margin-top:8px;opacity:0.7">Waiting for opponent...</div>';
     } else {
       flash.style.background = "rgba(239,68,68,0.12)";
       flash.style.color = "#ef4444";
-      flash.textContent = "✗ Try again";
+      flash.innerHTML = '<div>✗ Try again</div>';
     }
     container.appendChild(flash);
     setTimeout(() => {
       flash.style.opacity = "0";
       setTimeout(() => { if (flash.parentNode) flash.parentNode.removeChild(flash); }, 150);
-    }, ok ? 400 : 600);
+    }, ok ? 8000 : 600); // keep "Waiting" visible for 8s (next round will clear it)
   }
 
   numpad.onInput((val) => {
@@ -57,7 +55,6 @@ export function mountCalculations(container, payload, callbacks) {
       beepWrong();
       showLocalResult(false);
       numpad.clear();
-      // Don't mark submitted — player can retry
     }
   });
 

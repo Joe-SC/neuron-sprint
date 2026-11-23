@@ -195,9 +195,15 @@ function startMatch(config) {
   s.appendChild(matchView.gameArea);
 }
 
+// Clear any stuck-round watchdog
+let _roundWatchdog = null;
+
 function onRoundStart(msg) {
   if (!matchView) return;
   matchView.currentRound = msg.roundIndex ?? 0;
+
+  // Cancel the stuck-round watchdog if any
+  if (_roundWatchdog) { clearTimeout(_roundWatchdog); _roundWatchdog = null; }
 
   // Clean up previous game renderer
   if (matchView.gameRenderer) {
