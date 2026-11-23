@@ -11,7 +11,8 @@ const RACE_GAMES = ["calculations", "stroop", "numberCruncher", "birdWatching"];
 const TIMED_GAMES = ["connectMaze", "lowToHigh"];
 const ROUND_TIMEOUT_RACE = 25000;
 const ROUND_TIMEOUT_TIMED = 90000;
-const COUNTDOWN_MS = 3000;
+const COUNTDOWN_MS = 400;
+const RESULT_DELAY_MS = 600;
 
 export class Match {
   /**
@@ -168,7 +169,7 @@ export class Match {
         scores: this._scoreSnapshot(),
       });
       // slight delay before next round
-      setTimeout(() => this._advanceRound(), 1200);
+      setTimeout(() => this._advanceRound(), RESULT_DELAY_MS);
     } else {
       this._recordStats(playerId, round.game, timeMs, false);
       this.room.send(player.ws, {
@@ -197,7 +198,7 @@ export class Match {
       round.done = true;
       this._clearRoundTimer();
       this._scoreTimedRound(round);
-      setTimeout(() => this._advanceRound(), 1500);
+      setTimeout(() => this._advanceRound(), RESULT_DELAY_MS);
     }
   }
 

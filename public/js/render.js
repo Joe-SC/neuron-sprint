@@ -12,26 +12,18 @@ export function clear(el) {
 }
 
 // ── Countdown overlay ──
-// Shows 3…2…1…GO then calls start() when GO appears.
+// Brief "Go!" flash then enables input. Total ~400ms.
 export function mountCountdown(container, onGo) {
   const overlay = el("div", "countdown-overlay visible");
+  overlay.innerHTML = '<span>Go!<span class="sub"></span></span>';
   container.appendChild(overlay);
+  setTimeout(() => {
+    overlay.classList.remove("visible");
+    container.removeChild(overlay);
+    if (onGo) onGo();
+  }, 400);
 
-  const steps = ["3", "2", "1", "GO"];
-  let i = 0;
-  const interval = setInterval(() => {
-    if (i >= steps.length) {
-      clearInterval(interval);
-      overlay.classList.remove("visible");
-      container.removeChild(overlay);
-      if (onGo) onGo();
-      return;
-    }
-    overlay.innerHTML = `<span>${steps[i]}<span class="sub">${i < 3 ? "get ready" : ""}</span></span>`;
-    i++;
-  }, 800);
-
-  return () => { clearInterval(interval); if (overlay.parentNode) container.removeChild(overlay); };
+  return () => { if (overlay.parentNode) container.removeChild(overlay); };
 }
 
 // ── Scoreboard ──

@@ -41,6 +41,17 @@ function mountScreen(id) {
   return screen;
 }
 
+// ── Game definitions (for the selection UI) ──
+const GAME_INFO = {
+  calculations: { label: "Calculations", icon: "8×3", desc: "Race to solve arithmetic problems first" },
+  stroop: { label: "Stroop Test", icon: "R B", desc: "Tap the ink colour, not the word" },
+  numberCruncher: { label: "Number Cruncher", icon: "# #", desc: "Count numbers by colour or motion" },
+  birdWatching: { label: "Bird Watching", icon: "~ ~", desc: "Watch birds appear and count them all" },
+  connectMaze: { label: "Connect Maze", icon: "A 1", desc: "Tap A-1-B-2…M-13 fastest" },
+  lowToHigh: { label: "Low to High", icon: "1 2", desc: "Remember numbers, tap ascending order" },
+};
+const DEFAULT_GAMES = Object.keys(GAME_INFO);
+
 // ── Lobby ──
 function buildLobby() {
   showScreen("lobby");
@@ -54,6 +65,7 @@ function buildLobby() {
     </div>
     <input type="text" class="name-input" id="nameInput" maxlength="20" placeholder="Your name">
     <ul class="player-list" id="playerList"></ul>
+    <div class="game-picker" id="gamePicker" style="display:none"></div>
     <div class="lobby-actions">
       <button class="btn btn-secondary" id="readyBtn">Ready</button>
       <button class="btn btn-primary" id="startBtn" disabled>Start Match</button>
@@ -66,10 +78,12 @@ function buildLobby() {
   const readyBtn = document.getElementById("readyBtn");
   const startBtn = document.getElementById("startBtn");
   const modeBtn = document.getElementById("modeBtn");
+  const gamePicker = document.getElementById("gamePicker");
 
   let ready = false;
   let mode = "versus";
   let players = [];
+  let selectedGames = [...DEFAULT_GAMES];
 
   nameInput.addEventListener("input", () => {
     send({ type: "rename", name: nameInput.value.trim() || "Player" });
@@ -88,12 +102,43 @@ function buildLobby() {
     const idx = (modes.indexOf(mode) + 1) % modes.length;
     mode = modes[idx];
     modeBtn.textContent = `Mode: ${mode.charAt(0).toUpperCase() + mode.slice(1)}`;
+    gamePicker.style.display = (mode === "versus") ? "block" : "none";
+    if (mode !== "versus") selectedGames = [...DEFAULT_GAMES];
     updateStartBtn();
   });
 
+  // Build game selection grid
+  function buildGamePicker() {
+    gamePicker.innerHTML = `<div style="font-size:0.85rem;color:#94a3b8;margin-bottom:8px">Games in rotation (tap to toggle)</div>`;
+    const grid = document.createElement("div");
+    grid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px";
+    gamePicker.appendChild(grid);
+
+    for (const [id, info] of Object.entries(GAME_INFO)) {
+      const card = document.createElement("div");
+      card.className = "game-card";
+      card.dataset.game = id;
+      card.innerHTML = `<div class="game-icon">${esc(info.icon)}</div><div class="game-label">${esc(info.label)}</div>`;
+      card.addEventListener("click", () => {
+        const idx = selectedGames.indexOf(id);
+        if (idx >= 0) {
+          if (selectedGames.length <= 1) return; // must keep at least one
+          selectedGames.splice(idx, 1);
+          card.classList.remove("selected");
+        } else {
+          selectedGames.push(id);
+          card.classList.add("selected");
+        }
+      });
+      if (selectedGames.includes(id)) card.classList.add("selected");
+      grid.appendChild(card);
+    }
+  }
+  buildGamePicker();
+
   startBtn.addEventListener("click", () => {
     if (!isHost || !players.every(p => p.ready || p.host)) return;
-    send({ type: "startMatch", config: { mode, games: [], rounds: 7 } });
+    send({ type: "startMatch", config: { mode, games: selectedGames, rounds: 7 } });
     startBtn.disabled = true;
   });
 

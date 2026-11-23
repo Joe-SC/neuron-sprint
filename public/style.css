@@ -92,6 +92,35 @@ body {
 .badge-ready { background: #22c55e; color: #0f172a; }
 .badge-waiting { background: #334155; color: #94a3b8; }
 
+/* ── Game picker cards ── */
+.game-card {
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 12px;
+  padding: 14px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.game-card:active { transform: scale(0.96); }
+.game-card.selected {
+  border-color: #22c55e;
+  background: #132e22;
+}
+.game-card .game-icon {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #f59e0b;
+  margin-bottom: 4px;
+  letter-spacing: 0.15em;
+}
+.game-card .game-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
 .lobby-actions {
   display: flex;
   flex-direction: column;
@@ -167,7 +196,6 @@ body {
   color: #f59e0b;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s;
 }
 .countdown-overlay.visible { opacity: 1; pointer-events: auto; }
 .countdown-overlay .sub {
