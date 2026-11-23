@@ -172,8 +172,9 @@ function onRoundStart(msg) {
   // Show countdown
   const countdown = mountCountdown(gameArea, () => {
     beepGo();
-    if (matchView.gameRenderer && matchView.gameRenderer.enable) {
-      matchView.gameRenderer.enable();
+    // Enable game input; renderer may not be set yet if switch fell through
+    if (matchView && matchView.gameRenderer && matchView.gameRenderer.enable) {
+      try { matchView.gameRenderer.enable(); } catch (e) { console.warn("enable error", e); }
     }
   });
 

@@ -1,5 +1,6 @@
 // On-screen number pad component. Tap digits to build a value, OK to submit.
 // Physical keyboard 0-9/Enter/Backspace also work.
+// Uses pointerdown for instant touch feedback on mobile.
 
 export function createNumpad() {
   let value = "";
@@ -20,21 +21,40 @@ export function createNumpad() {
     ["bs", "0", "ok"],
   ];
 
+  // Use pointerdown for reliable mobile touch (fires before click, no 300ms delay)
+  function onPointer(btn, action) {
+    btn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      action();
+    });
+  }
+
   for (const row of rows) {
     for (const key of row) {
       const btn = document.createElement("button");
+      btn.setAttribute("type", "button");
+
       if (key === "bs") {
         btn.className = "backspace";
         btn.textContent = "\u232b"; // backspace symbol
-        btn.addEventListener("click", () => { value = value.slice(0, -1); updateDisplay(); });
+        onPointer(btn, () => { value = value.slice(0, -1); updateDisplay(); });
       } else if (key === "ok") {
         btn.className = "ok";
         btn.textContent = "OK";
-        btn.addEventListener("click", () => { if (onSubmit) onSubmit(value); });
+        onPointer(btn, () => {
+          if (onSubmit) {
+            // Visual feedback: flash button text to confirm press
+            const orig = btn.textContent;
+            btn.textContent = "\u2713";
+            btn.style.background = "#16a34a";
+            setTimeout(() => { btn.textContent = orig; btn.style.background = ""; }, 300);
+            onSubmit(value);
+          }
+        });
       } else {
         btn.className = "digit";
         btn.textContent = key;
-        btn.addEventListener("click", () => { value = (value + key).slice(0, 7); updateDisplay(); });
+        onPointer(btn, () => { value = (value + key).slice(0, 7); updateDisplay(); });
       }
       container.appendChild(btn);
     }
